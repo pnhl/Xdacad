@@ -4,14 +4,14 @@ require_once '../config/auth_middleware.php';
 
 header('Content-Type: application/json');
 
-// Handle logout request
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+// Handle logout GET request
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? '') === 'logout') {
     destroyUserSession();
-    header('Location: ../login.php');
+    header('Location: ../login.php?message=logged_out');
     exit;
 }
 
-// Only handle POST requests for API
+// Only handle POST requests for other actions
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
 }
@@ -19,6 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
+
+// CSRF token validation for sensitive actions
+if (in_array($action, ['login', 'register', 'change_password', 'reset_password'])) {
+    $csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $input['csrf_token'] ?? null;
+    if (!$csrfToken || !verifyCSRFToken($csrfToken)) {
+        jsonResponse(['success' => false, 'message' => 'Invalid CSRF token'], 403);
+    }
+}
 
 switch ($action) {
     case 'login':

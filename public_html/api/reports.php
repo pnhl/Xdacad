@@ -12,6 +12,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 $input = $method === 'POST' ? json_decode(file_get_contents('php://input'), true) : $_GET;
 $action = $input['action'] ?? '';
 
+// Verify CSRF token for POST requests
+if ($method === 'POST') {
+    $csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $input['csrf_token'] ?? null;
+    if (!$csrfToken || !verifyCSRFToken($csrfToken)) {
+        jsonResponse(['success' => false, 'message' => 'Invalid CSRF token'], 403);
+    }
+}
+
 switch ($action) {
     case 'get_timesheet':
         handleGetTimesheet($input);

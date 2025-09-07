@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tạo Ca Làm Việc</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>Test Tạo Ca Làm Việc</h1>
+    
+    <form id="test-form">
+        <div class="form-group">
+            <label for="date">Ngày làm việc:</label>
+            <input type="date" id="date" name="date" value="<?= date('Y-m-d') ?>" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="planned_start">Giờ bắt đầu:</label>
+            <input type="time" id="planned_start" name="planned_start" value="09:00" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="planned_end">Giờ kết thúc:</label>
+            <input type="time" id="planned_end" name="planned_end" value="17:00" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="workplace">Nơi làm việc:</label>
+            <input type="text" id="workplace" name="workplace" value="Văn phòng" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="notes">Ghi chú:</label>
+            <textarea id="notes" name="notes" rows="3"></textarea>
+        </div>
+        
+        <button type="submit">Tạo Ca Làm Việc</button>
+    </form>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        document.getElementById('test-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const date = formData.get('date');
+            const plannedStart = formData.get('planned_start');
+            const plannedEnd = formData.get('planned_end');
+            
+            const data = {
+                action: 'create_shift',
+                date: date,
+                planned_start: date + ' ' + plannedStart + ':00',
+                planned_end: date + ' ' + plannedEnd + ':00',
+                workplace: formData.get('workplace'),
+                notes: formData.get('notes')
+            };
+            
+            console.log('Sending data:', data);
+            
+            try {
+                const response = await fetch('public_html/api/shifts.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': 'test-token' // For testing
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                const result = await response.text();
+                console.log('Raw response:', result);
+                
+                let jsonResult;
+                try {
+                    jsonResult = JSON.parse(result);
+                } catch (e) {
+                    jsonResult = { success: false, message: 'Invalid JSON response', raw: result };
+                }
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result ' + (jsonResult.success ? 'success' : 'error');
+                resultDiv.innerHTML = `
+                    <h3>Kết quả:</h3>
+                    <p><strong>Success:</strong> ${jsonResult.success}</p>
+                    <p><strong>Message:</strong> ${jsonResult.message || 'No message'}</p>
+                    <p><strong>Raw Response:</strong> ${result}</p>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>Lỗi:</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
