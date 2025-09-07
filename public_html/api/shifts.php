@@ -12,6 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(['success' => false, 'message' => 'Method not allowed'], 405);
 }
 
+// Verify CSRF token for non-GET requests
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_POST['csrf_token'] ?? null;
+if (!$csrfToken || !verifyCSRFToken($csrfToken)) {
+    jsonResponse(['success' => false, 'message' => 'Invalid CSRF token'], 403);
+}
+
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';

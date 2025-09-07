@@ -1,6 +1,24 @@
-# Work Schedule & Payroll Management System
+<div align="center">
 
-Hệ thống quản lý lịch làm việc và tính lương theo giờ được thiết kế để chạy trên InfinityFree hosting với PHP và MySQL.
+# 🕐 Work Schedule & Payroll Management System
+
+<img src="https://img.shields.io/badge/PHP-8%2B-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+<img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+<img src="https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+<img src="https://img.shields.io/badge/CSS3-Grid%20%26%20Flexbox-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+
+<img src="https://img.shields.io/badge/Status-Production%20Ready-00C851?style=for-the-badge" alt="Status">
+<img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License">
+<img src="https://img.shields.io/badge/Hosting-InfinityFree-orange?style=for-the-badge" alt="Hosting">
+
+### 🚀 Hệ thống quản lý lịch làm việc và tính lương theo giờ chuyên nghiệp
+#### Thiết kế tối ưu cho InfinityFree hosting với PHP 8+ và MySQL
+
+[🌟 Demo Live](#-demo-live) • [📖 Tài liệu](#-tài-liệu) • [🚀 Cài đặt](#-cài-đặt--triển-khai) • [💡 Tính năng](#-tính-năng-chính)
+
+---
+
+</div>
 
 ## 🚀 Tính năng chính
 
