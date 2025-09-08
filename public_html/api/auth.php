@@ -18,6 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
+
+// If JSON decode fails, try form data
+if ($input === null) {
+    $input = $_POST;
+}
+
 $action = $input['action'] ?? '';
 
 // CSRF token validation for sensitive actions

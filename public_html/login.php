@@ -125,5 +125,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script src="assets/js/app.js"></script>
+    <script>
+        document.querySelector('form[data-validate]').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                action: 'login',
+                email: formData.get('email'),
+                password: formData.get('password'),
+                csrf_token: formData.get('csrf_token')
+            };
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Đang đăng nhập...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = 'dashboard.php';
+                } else {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'alert alert-error mb-4';
+                    messageDiv.textContent = result.message;
+                    this.insertBefore(messageDiv, this.firstChild);
+                }
+            } catch (error) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'alert alert-error mb-4';
+                messageDiv.textContent = 'Đã có lỗi xảy ra, vui lòng thử lại';
+                this.insertBefore(messageDiv, this.firstChild);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>

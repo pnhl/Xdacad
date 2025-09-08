@@ -506,6 +506,10 @@ try {
                     body: JSON.stringify(data)
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
                 
                 if (result.success) {
@@ -516,6 +520,7 @@ try {
                     showToast(result.message, 'error');
                 }
             } catch (error) {
+                console.error('Create shift error:', error);
                 showToast('Có lỗi xảy ra khi lưu ca làm việc', 'error');
             } finally {
                 const submitBtn = this.querySelector('button[type="submit"]');

@@ -20,6 +20,12 @@ if (!$csrfToken || !verifyCSRFToken($csrfToken)) {
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
+
+// If JSON decode fails, try form data
+if ($input === null) {
+    $input = $_POST;
+}
+
 $action = $input['action'] ?? '';
 
 switch ($action) {
@@ -67,24 +73,18 @@ function handleCreateShift($input) {
     $workplace = sanitizeInput($input['workplace'] ?? '');
     $notes = sanitizeInput($input['notes'] ?? '');
     
-    // Debug logging
-    error_log("Create shift attempt - User: $userId, Date: $date, Start: $plannedStart, End: $plannedEnd");
-    
     // Validation
     if (empty($date) || empty($plannedStart) || empty($plannedEnd) || empty($workplace)) {
-        error_log("Validation failed - Missing required fields");
         jsonResponse(['success' => false, 'message' => 'Vui lòng nhập đầy đủ thông tin bắt buộc']);
     }
     
     // Validate date format
     if (!DateTime::createFromFormat('Y-m-d', $date)) {
-        error_log("Invalid date format: $date");
         jsonResponse(['success' => false, 'message' => 'Định dạng ngày không hợp lệ']);
     }
     
     // Validate datetime format
     if (!DateTime::createFromFormat('Y-m-d H:i:s', $plannedStart) || !DateTime::createFromFormat('Y-m-d H:i:s', $plannedEnd)) {
-        error_log("Invalid datetime format - Start: $plannedStart, End: $plannedEnd");
         jsonResponse(['success' => false, 'message' => 'Định dạng thời gian không hợp lệ']);
     }
     
@@ -93,7 +93,6 @@ function handleCreateShift($input) {
     $endTime = new DateTime($plannedEnd);
     
     if ($startTime >= $endTime) {
-        error_log("Start time >= End time");
         jsonResponse(['success' => false, 'message' => 'Thời gian kết thúc phải sau thời gian bắt đầu']);
     }
     
@@ -119,7 +118,6 @@ function handleCreateShift($input) {
         ]);
         
         if ($stmt->fetch()) {
-            error_log("Overlapping shift found");
             jsonResponse(['success' => false, 'message' => 'Đã có ca làm việc trùng thời gian']);
         }
         
@@ -136,7 +134,6 @@ function handleCreateShift($input) {
         }
         
         $shiftId = $pdo->lastInsertId();
-        error_log("Shift created successfully - ID: $shiftId");
         
         logAudit('shift_created', [
             'shift_id' => $shiftId,
@@ -152,7 +149,7 @@ function handleCreateShift($input) {
         
     } catch (Exception $e) {
         error_log("Create shift error: " . $e->getMessage() . " in " . $e->getFile() . " line " . $e->getLine());
-        jsonResponse(['success' => false, 'message' => 'Đã có lỗi xảy ra: ' . $e->getMessage()]);
+        jsonResponse(['success' => false, 'message' => 'Đã có lỗi xảy ra, vui lòng thử lại']);
     }
 }
 

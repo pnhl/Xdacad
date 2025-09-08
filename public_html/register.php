@@ -204,6 +204,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         });
+        
+        // Form submission
+        document.querySelector('form[data-validate]').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                action: 'register',
+                name: formData.get('name'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                confirm_password: formData.get('confirm_password'),
+                hourly_rate: formData.get('hourly_rate'),
+                workplace_default: formData.get('workplace_default'),
+                csrf_token: formData.get('csrf_token')
+            };
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Đang đăng ký...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = 'login.php?message=register_success';
+                } else {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'alert alert-error mb-4';
+                    messageDiv.textContent = result.message;
+                    this.insertBefore(messageDiv, this.firstChild);
+                }
+            } catch (error) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'alert alert-error mb-4';
+                messageDiv.textContent = 'Đã có lỗi xảy ra, vui lòng thử lại';
+                this.insertBefore(messageDiv, this.firstChild);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>

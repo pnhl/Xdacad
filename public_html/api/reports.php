@@ -9,7 +9,17 @@ header('Content-Type: application/json');
 
 // Handle both GET and POST requests
 $method = $_SERVER['REQUEST_METHOD'];
-$input = $method === 'POST' ? json_decode(file_get_contents('php://input'), true) : $_GET;
+
+if ($method === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    // If JSON decode fails, try form data
+    if ($input === null) {
+        $input = $_POST;
+    }
+} else {
+    $input = $_GET;
+}
+
 $action = $input['action'] ?? '';
 
 // Verify CSRF token for POST requests
