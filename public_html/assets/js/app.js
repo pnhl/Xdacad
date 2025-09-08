@@ -536,3 +536,8 @@ function formatDate(dateString) {
 function formatDuration(hours) {
     return window.app ? window.app.formatDuration(hours) : hours;
 }
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.app = new WorkScheduleApp();
+});

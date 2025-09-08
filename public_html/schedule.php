@@ -495,7 +495,11 @@ try {
             
             try {
                 const submitBtn = this.querySelector('button[type="submit"]');
-                showLoading(submitBtn);
+                
+                // Show loading state
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Đang lưu...';
+                submitBtn.disabled = true;
                 
                 const response = await fetch('api/shifts.php', {
                     method: 'POST',
@@ -507,24 +511,50 @@ try {
                 });
                 
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP Error:', response.status, errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const result = await response.json();
+                console.log('API Response:', result);
                 
                 if (result.success) {
-                    showToast(result.message, 'success');
-                    closeModal();
+                    if (typeof showToast === 'function') {
+                        showToast(result.message, 'success');
+                    } else {
+                        alert(result.message);
+                    }
+                    if (typeof closeModal === 'function') {
+                        closeModal();
+                    }
                     setTimeout(() => location.reload(), 1000);
                 } else {
-                    showToast(result.message, 'error');
+                    if (typeof showToast === 'function') {
+                        showToast(result.message, 'error');
+                    } else {
+                        alert(result.message);
+                    }
                 }
+                
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
             } catch (error) {
                 console.error('Create shift error:', error);
-                showToast('Có lỗi xảy ra khi lưu ca làm việc', 'error');
-            } finally {
+                
+                // Reset button
                 const submitBtn = this.querySelector('button[type="submit"]');
-                hideLoading(submitBtn);
+                const originalText = submitBtn.getAttribute('data-original-text') || 'Lưu ca làm việc';
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                if (typeof showToast === 'function') {
+                    showToast('Có lỗi xảy ra khi lưu ca làm việc', 'error');
+                } else {
+                    alert('Có lỗi xảy ra khi lưu ca làm việc');
+                }
             }
         });
         
@@ -712,6 +742,42 @@ try {
                 }
             } catch (error) {
                 showToast('Có lỗi xảy ra khi xóa ca làm việc', 'error');
+            }
+        }
+        
+        // Helper functions
+        function showToast(message, type = 'info', duration = 5000) {
+            if (window.app && typeof window.app.showToast === 'function') {
+                window.app.showToast(message, type, duration);
+            } else {
+                // Fallback to simple alert
+                alert(message);
+            }
+        }
+        
+        function closeModal() {
+            if (window.app && typeof window.app.closeModal === 'function') {
+                window.app.closeModal();
+            } else {
+                // Fallback modal close
+                const modal = document.querySelector('.modal.active');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+        
+        function openModal(modalId) {
+            if (window.app && typeof window.app.openModal === 'function') {
+                window.app.openModal(modalId);
+            } else {
+                // Fallback modal open
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
             }
         }
     </script>

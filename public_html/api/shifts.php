@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Verify CSRF token for non-GET requests
-$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_POST['csrf_token'] ?? null;
+$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_POST['csrf_token'] ?? $input['csrf_token'] ?? null;
 if (!$csrfToken || !verifyCSRFToken($csrfToken)) {
     jsonResponse(['success' => false, 'message' => 'Invalid CSRF token'], 403);
 }
